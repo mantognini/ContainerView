@@ -92,14 +92,14 @@ void loadDocument(AdvancedDocument& doc)
 void updateDocument(AdvancedDocumentView view)
 {
     for (auto& e : view)
-        e->foo();
+        e.foo();
 }
 
 void printDocument(AdvancedDocumentConstView view)
 {
     std::cout << "<AdvancedDocument>\n";
     for (auto const& e : view)
-        e->print(1);
+        e.print(1);
     std::cout << "</AdvancedDocument>" << std::endl;
 }
 
@@ -119,11 +119,10 @@ int main(int, char**) {
     using V = ViewTypeFromCTVar(xs);
     using CV = ConstViewTypeFromCTVar(xs);
 
-    auto const& info_v = typeid(V);
-    auto const& info_cv = typeid(CV);
-    std::cout << "Name  V: " << info_v.name() << std::endl;
-    std::cout << "Name CV: " << info_cv.name() << std::endl;
-
+    std::cout << "Name V: " << typeid(V).name() << std::endl;
+    std::cout << "Name CV: " << typeid(CV).name() << std::endl;
+    std::cout << "Name DocumentView: " << typeid(DocumentView).name() << std::endl;
+    std::cout << "Name AdvancedDocumentView: " << typeid(AdvancedDocumentView).name() << std::endl;
 
     return 0;
 }

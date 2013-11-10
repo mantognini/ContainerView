@@ -15,6 +15,7 @@
 #include <iterator>
 #include <utility>
 #include <type_traits>
+#include <memory>
 
 
 
@@ -95,11 +96,68 @@ class ConstViewIterator : public IteratorFromContainer<C<T>>
     ConstViewIterator(type it) : self(it) { }
 
 public:
-    using const_reference =  typename IteratorFromContainer<Container>::value_type const&;
+    using const_reference = typename IteratorFromContainer<Container>::value_type const&;
     using SELF = ConstViewIterator<T, C>;
 
     ConstViewIterator& operator++() { ++self; return *this; }
     const_reference operator*() const { return *self; }
+
+    // Free function !=
+    friend
+    bool operator!=(SELF const& a, SELF const& b)
+    {
+        return a.self != b.self;
+    }
+};
+
+
+
+// Iterator on shared_ptr
+
+template <class T, template <class...> class C>
+class ViewIterator<std::shared_ptr<T>, C> : public IteratorFromContainer<C<std::shared_ptr<T>>>
+{
+    using Container = C<std::shared_ptr<T>>;
+    using type = typename Container::iterator;
+    type self; // The underlying iterator
+
+    friend View<std::shared_ptr<T>, C>;
+
+    ViewIterator(type it) : self(it) { }
+
+public:
+    using reference = typename Container::value_type::element_type&;
+    using SELF = ViewIterator<std::shared_ptr<T>, C>;
+
+    ViewIterator& operator++() { ++self; return *this; }
+    reference operator*() { return **self; }
+
+    // Free function !=
+    friend
+    bool operator!=(SELF const& a, SELF const& b)
+    {
+        return a.self != b.self;
+    }
+};
+
+template <class T, template <class...> class C>
+class ConstViewIterator<std::shared_ptr<T>, C> : public IteratorFromContainer<C<std::shared_ptr<T>>>
+{
+    using Container = C<std::shared_ptr<T>>;
+    using type = typename Container::const_iterator;
+    type self; // The underlying iterator
+
+    friend View<std::shared_ptr<T>, C>;
+    friend ConstView<std::shared_ptr<T>, C>;
+
+    ConstViewIterator(type it) : self(it) { }
+
+public:
+    using const_reference = typename Container::value_type::element_type const&;
+    using SELF = ConstViewIterator<std::shared_ptr<T>, C>;
+
+    ConstViewIterator& operator++() { ++self; return *this; }
+    const_reference operator*() const { return **self; }
 
     // Free function !=
     friend
@@ -141,6 +199,45 @@ public:
     using Base = ConstView<T, C>;
 
     View(Container& container) : ConstView<T, C>(container), underlying_container(container) { }
+
+    using Base::begin;
+    iterator begin() { return { underlying_container.begin() }; }
+    using Base::end;
+    iterator end() { return { underlying_container.end() }; }
+};
+
+
+
+// Views for shared pointer
+
+template <class T, template <class...> class C>
+class ConstView<std::shared_ptr<T>, C>
+{
+protected:
+    using Container = C<std::shared_ptr<T>>;
+    Container const& underlying_container;
+
+public:
+    using const_iterator = ConstViewIterator<std::shared_ptr<T>, C>;
+
+    ConstView(Container const& container) : underlying_container(container) { }
+
+    const_iterator begin() const { return { underlying_container.begin() }; }
+    const_iterator end() const { return { underlying_container.end() }; }
+};
+
+
+template <class T, template <class...> class C>
+class View<std::shared_ptr<T>, C> : public ConstView<std::shared_ptr<T>, C>
+{
+    using Container = C<std::shared_ptr<T>>;
+    Container& underlying_container;
+
+public:
+    using iterator = ViewIterator<std::shared_ptr<T>, C>;
+    using Base = ConstView<std::shared_ptr<T>, C>;
+
+    View(Container& container) : ConstView<std::shared_ptr<T>, C>(container), underlying_container(container) { }
 
     using Base::begin;
     iterator begin() { return { underlying_container.begin() }; }
