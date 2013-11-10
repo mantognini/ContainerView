@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		0C3EA7E3182F876800F3E29C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0C3EA7E2182F876800F3E29C /* main.cpp */; };
-		0C3EA7E5182F876800F3E29C /* ContainerView.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0C3EA7E4182F876800F3E29C /* ContainerView.1 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -18,7 +17,6 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				0C3EA7E5182F876800F3E29C /* ContainerView.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -27,7 +25,7 @@
 /* Begin PBXFileReference section */
 		0C3EA7DF182F876800F3E29C /* ContainerView */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ContainerView; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C3EA7E2182F876800F3E29C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		0C3EA7E4182F876800F3E29C /* ContainerView.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = ContainerView.1; sourceTree = "<group>"; };
+		0C3EA7EC182F8A4D00F3E29C /* View.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = View.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				0C3EA7E2182F876800F3E29C /* main.cpp */,
-				0C3EA7E4182F876800F3E29C /* ContainerView.1 */,
+				0C3EA7EC182F8A4D00F3E29C /* View.hpp */,
 			);
 			path = ContainerView;
 			sourceTree = "<group>";
