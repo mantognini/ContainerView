@@ -6,32 +6,6 @@
 //  Copyright (c) 2013 Marco Antognini. All rights reserved.
 //
 
-//#include <iostream>
-//#include <typeinfo>
-//#include <vector>
-//#include <scoped_allocator>
-//
-//template <template <class...> class C, class T>
-//struct Helper
-//{
-//    using allocator = typename C<T>::allocator_type;
-//};
-//
-//template <class T>
-//using Vector = std::vector<T, std::scoped_allocator_adaptor<std::allocator<T>>>;
-//
-//int main(int argc, const char * argv[])
-//{
-//    auto const& info = typeid(Helper<Vector, int>::allocator);
-//    auto const& info2 = typeid(Helper<std::vector, int>::allocator);
-//
-//    std::cout << "Name: " << info.name() << std::endl;
-//    std::cout << "Name: " << info2.name() << std::endl;
-//
-//    return 0;
-//}
-
-
 
 #include "View.hpp"
 #include <iostream>

@@ -11,7 +11,6 @@
 #define CONTAINERVIEW_VIEW_HPP
 
 
-
 #include <iterator>
 #include <utility>
 #include <type_traits>
