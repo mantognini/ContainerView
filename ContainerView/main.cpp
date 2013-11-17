@@ -47,6 +47,7 @@ using Document = std::vector<Element>;
 using DocumentView = ViewTypeFromCT_t<Document>;
 using DocumentConstView = ConstViewTypeFromCT_t<Document>;
 
+// Loading need the vector itself since it needs to add elements
 void loadDocument(Document& doc)
 {
     for (auto i : { 2, 3, 5 })
@@ -72,6 +73,7 @@ using AdvancedDocument = std::vector<std::shared_ptr<Element>>;
 using AdvancedDocumentView = ViewTypeFromCT_t<AdvancedDocument>;
 using AdvancedDocumentConstView = ConstViewTypeFromCT_t<AdvancedDocument>;
 
+// Loading need the vector itself since it needs to add elements
 void loadDocument(AdvancedDocument& doc)
 {
     for (auto i : { 7, 11, 13 })
@@ -95,13 +97,13 @@ void printDocument(AdvancedDocumentConstView view)
 int main(int, char**) {
     Document xs;
     loadDocument(xs);
-    printDocument(viewOf(xs));
+    printDocument(viewOf(xs));  // Ok, auto conversion to const view
     updateDocument(viewOf(xs));
     printDocument(constViewOf(xs));
 
     AdvancedDocument ys;
     loadDocument(ys);
-    printDocument(viewOf(ys));
+    printDocument(viewOf(ys));  // Ok, auto conversion to const view
     updateDocument(viewOf(ys));
     printDocument(constViewOf(ys));
 
