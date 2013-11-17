@@ -264,12 +264,14 @@ public:
 // Helpers for the user
 
 template <class T, template <class...> class C>
-View<T, C> viewOf(C<T>& container) {
+View<T, C> viewOf(C<T>& container)
+{
     return { container };
 }
 
 template <class T, template <class...> class C>
-ConstView<T, C> constViewOf(C<T> const& container) {
+ConstView<T, C> constViewOf(C<T> const& container)
+{
     return { container };
 }
 

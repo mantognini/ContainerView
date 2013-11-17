@@ -28,7 +28,8 @@
 #include <vector>
 #include <memory>
 
-class Element {
+class Element
+{
     int x;
 public:
     Element(int y) : x(y) { }
@@ -94,7 +95,8 @@ void printDocument(AdvancedDocumentConstView view)
     std::cout << "</AdvancedDocument>" << std::endl;
 }
 
-int main(int, char**) {
+int main(int, char**)
+{
     Document xs;
     loadDocument(xs);
     printDocument(viewOf(xs));  // Ok, auto conversion to const view
