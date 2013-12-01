@@ -1,0 +1,37 @@
+import os
+
+env = Environment()
+
+env['CXX'] = 'clang++'
+env['CCFLAGS'] = '-stdlib=libc++ '
+env['LINKFLAGS'] = '-stdlib=libc++ '
+
+env.Append(CCFLAGS='-std=c++11 -g -Wall -Wextra -Werror -I include/')
+env.Decider('content')
+
+src_dir = ['.'] # use the copy made by VariantDir
+
+
+# Source files:
+folders   = [ '.' ]
+base      = [ Glob(f + '/*.cpp') for f in folders ]
+src_files = base
+objects   = env.Object(source=src_files)
+
+# Make sure header were not changed - otherwise recompile
+env.Append(CPPPATH = folders)
+
+def DefineProgram(name):
+    target = env.Program(name, source = objects)
+    env.Alias(name, target)
+    run = env.Command(name+".out",[],"./build/"+name, ENV = os.environ)
+    env.Alias("run", run)
+    env.Depends(run, target)
+    env.AlwaysBuild(run)
+    env.Default(target) # prevent auto execution of 'run' targets
+                        # when running `scons -Q`, for example
+
+DefineProgram('test')
+
+
+
