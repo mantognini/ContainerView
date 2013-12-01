@@ -42,6 +42,8 @@ public:
     }
 
     void foo() { ++x; }
+
+    int getX() const { return x; }
 };
 
 using Document = std::vector<Element>;
@@ -77,7 +79,7 @@ using AdvancedDocumentConstView = ConstViewTypeFromCT_t<AdvancedDocument>;
 // Loading need the vector itself since it needs to add elements
 void loadDocument(AdvancedDocument& doc)
 {
-    for (auto i : { 7, 11, 13 })
+    for (auto i : { 7, 11, 18 })
         doc.emplace_back(std::make_shared<Element>(i));
 }
 
@@ -103,11 +105,15 @@ int main(int, char**)
     updateDocument(viewOf(xs));
     printDocument(constViewOf(xs));
 
+    printDocument(constViewOf(xs, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
+
     AdvancedDocument ys;
     loadDocument(ys);
     printDocument(viewOf(ys));  // Ok, auto conversion to const view
     updateDocument(viewOf(ys));
     printDocument(constViewOf(ys));
+
+    printDocument(constViewOf(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
 
     using V = ViewTypeFromCTVar(xs);
     using CV = ConstViewTypeFromCTVar(xs);
