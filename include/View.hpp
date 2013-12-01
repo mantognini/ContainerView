@@ -30,6 +30,8 @@
 #include <utility>
 #include <type_traits>
 #include <memory>
+#include <functional>
+#include <cassert>
 
 
 
@@ -63,7 +65,27 @@ using IteratorReference = typename C::iterator::reference;
 template <class C>
 using IteratorFromContainer = std::iterator<IteratorCategory<C>, IteratorType<C>, IteratorDistance<C>, IteratorPointer<C>, IteratorReference<C>>;
 
+// Iterator filter, basic predicate function
+// With template specification for shared_ptr
 
+template <class T>
+struct ElementType { using type = T; };
+template <class T>
+struct ElementType<std::shared_ptr<T>> { using type = T; };
+template <class T>
+using ElementType_t = typename ElementType<T>::type;
+
+template <class T>
+using AddConstRef_t = typename std::add_lvalue_reference<typename std::add_const<T>::type>::type;
+
+template <class T>
+using IteratorFilter = std::function<bool(AddConstRef_t<ElementType_t<T>>)>;
+
+template <class T>
+struct DefaultFilter
+{
+    inline bool operator()(ElementType_t<T> const&) { return true; }
+};
 
 // Iterators for View
 
@@ -73,17 +95,36 @@ class ViewIterator : public IteratorFromContainer<C<T>>
     using Container = C<T>;
     using type = typename Container::iterator;
     type self; // The underlying iterator
+    type end;
+    IteratorFilter<T> filter;
 
     friend View<T, C>;
 
-    ViewIterator(type it) : self(it) { }
+    ViewIterator(type it, type end, IteratorFilter<T> predicate)
+    : self(it), end(end), filter(predicate)
+    {
+        if (end != self && !filter(get()))
+            increment();
+    }
+
+    void increment()
+    {
+        // Loop until a valid element is found or the end is reached
+        bool loop = self != end;
+        while (loop) {
+            ++self;
+            if (self == end || filter(get()))
+                loop = false;
+        }
+    }
 
 public:
     using typename IteratorFromContainer<Container>::reference;
     using SELF = ViewIterator<T, C>;
 
-    ViewIterator& operator++() { ++self; return *this; }
-    reference operator*() { return *self; }
+    ViewIterator& operator++() { increment(); return *this; }
+    reference get() const  { assert(self != end); return *self; }
+    reference operator*() const { return get(); }
 
     // Free function !=
     friend
@@ -103,18 +144,37 @@ class ConstViewIterator : public IteratorFromContainer<C<T>>
     using Container = C<T>;
     using type = typename Container::const_iterator;
     type self; // The underlying iterator
+    type end;
+    IteratorFilter<T> filter;
 
     friend View<T, C>;
     friend ConstView<T, C>;
 
-    ConstViewIterator(type it) : self(it) { }
+    ConstViewIterator(type it, type end, IteratorFilter<T> predicate)
+    : self(it), end(end), filter(predicate)
+    {
+        if (end != self && !filter(get()))
+            increment();
+    }
+
+    void increment()
+    {
+        // Loop until a valid element is found or the end is reached
+        bool loop = self != end;
+        while (loop) {
+            ++self;
+            if (self == end || filter(get()))
+                loop = false;
+        }
+    }
 
 public:
     using const_reference = typename IteratorFromContainer<Container>::value_type const&;
     using SELF = ConstViewIterator<T, C>;
 
-    ConstViewIterator& operator++() { ++self; return *this; }
-    const_reference operator*() const { return *self; }
+    ConstViewIterator& operator++() { increment(); return *this; }
+    const_reference get() const { assert(self != end); return *self; }
+    const_reference operator*() const { return get(); }
 
     // Free function !=
     friend
@@ -134,17 +194,36 @@ class ViewIterator<std::shared_ptr<T>, C> : public IteratorFromContainer<C<std::
     using Container = C<std::shared_ptr<T>>;
     using type = typename Container::iterator;
     type self; // The underlying iterator
+    type end;
+    IteratorFilter<T> filter;
 
     friend View<std::shared_ptr<T>, C>;
 
-    ViewIterator(type it) : self(it) { }
+    ViewIterator(type it, type end, IteratorFilter<T> predicate)
+    : self(it), end(end), filter(predicate)
+    {
+        if (end != self && !filter(get()))
+            increment();
+    }
+
+    void increment()
+    {
+        // Loop until a valid element is found or the end is reached
+        bool loop = self != end;
+        while (loop) {
+            ++self;
+            if (self == end || filter(get()))
+                loop = false;
+        }
+    }
 
 public:
     using reference = typename Container::value_type::element_type&;
     using SELF = ViewIterator<std::shared_ptr<T>, C>;
 
-    ViewIterator& operator++() { ++self; return *this; }
-    reference operator*() { return **self; }
+    ViewIterator& operator++() { increment(); return *this; }
+    reference get() const { assert(self != end); return **self; }
+    reference operator*() const { return get(); }
 
     // Free function !=
     friend
@@ -160,18 +239,37 @@ class ConstViewIterator<std::shared_ptr<T>, C> : public IteratorFromContainer<C<
     using Container = C<std::shared_ptr<T>>;
     using type = typename Container::const_iterator;
     type self; // The underlying iterator
+    type end;
+    IteratorFilter<T> filter;
 
     friend View<std::shared_ptr<T>, C>;
     friend ConstView<std::shared_ptr<T>, C>;
 
-    ConstViewIterator(type it) : self(it) { }
+    ConstViewIterator(type it, type end, IteratorFilter<T> predicate)
+    : self(it), end(end), filter(predicate)
+    {
+        if (end != self && !filter(get()))
+            increment();
+    }
+
+    void increment()
+    {
+        // Loop until a valid element is found or the end is reached
+        bool loop = self != end;
+        while (loop) {
+            ++self;
+            if (self == end || filter(get()))
+                loop = false;
+        }
+    }
 
 public:
     using const_reference = typename Container::value_type::element_type const&;
     using SELF = ConstViewIterator<std::shared_ptr<T>, C>;
 
-    ConstViewIterator& operator++() { ++self; return *this; }
-    const_reference operator*() const { return **self; }
+    ConstViewIterator& operator++() { increment(); return *this; }
+    const_reference get() const  { assert(self != end); return **self; }
+    const_reference operator*() const { return get(); }
 
     // Free function !=
     friend
@@ -191,14 +289,17 @@ class ConstView
 protected:
     using Container = C<T>;
     Container const& underlying_container;
+    IteratorFilter<T> filter;
 
 public:
     using const_iterator = ConstViewIterator<T, C>;
 
-    ConstView(Container const& container) : underlying_container(container) { }
+    ConstView(Container const& container, IteratorFilter<T> predicate)
+    : underlying_container(container), filter(predicate)
+    { }
 
-    const_iterator begin() const { return { underlying_container.begin() }; }
-    const_iterator end() const { return { underlying_container.end() }; }
+    const_iterator begin() const { return { underlying_container.begin(), underlying_container.end(), filter }; }
+    const_iterator end() const { return { underlying_container.end(), underlying_container.end(), filter }; }
 };
 
 
@@ -212,12 +313,14 @@ public:
     using iterator = ViewIterator<T, C>;
     using Base = ConstView<T, C>;
 
-    View(Container& container) : ConstView<T, C>(container), underlying_container(container) { }
+    View(Container& container, IteratorFilter<T> predicate)
+    : ConstView<T, C>(container, predicate), underlying_container(container)
+    { }
 
     using Base::begin;
-    iterator begin() { return { underlying_container.begin() }; }
+    iterator begin() { return { underlying_container.begin(), underlying_container.end(), Base::filter }; }
     using Base::end;
-    iterator end() { return { underlying_container.end() }; }
+    iterator end() { return { underlying_container.end(), underlying_container.end(), Base::filter }; }
 };
 
 
@@ -230,14 +333,17 @@ class ConstView<std::shared_ptr<T>, C>
 protected:
     using Container = C<std::shared_ptr<T>>;
     Container const& underlying_container;
+    IteratorFilter<T> filter;
 
 public:
     using const_iterator = ConstViewIterator<std::shared_ptr<T>, C>;
 
-    ConstView(Container const& container) : underlying_container(container) { }
+    ConstView(Container const& container, IteratorFilter<T> predicate)
+    : underlying_container(container), filter(predicate)
+    { }
 
-    const_iterator begin() const { return { underlying_container.begin() }; }
-    const_iterator end() const { return { underlying_container.end() }; }
+    const_iterator begin() const { return { underlying_container.begin(), underlying_container.end(), filter }; }
+    const_iterator end() const { return { underlying_container.end(), underlying_container.end(), filter }; }
 };
 
 
@@ -251,12 +357,14 @@ public:
     using iterator = ViewIterator<std::shared_ptr<T>, C>;
     using Base = ConstView<std::shared_ptr<T>, C>;
 
-    View(Container& container) : ConstView<std::shared_ptr<T>, C>(container), underlying_container(container) { }
+    View(Container& container, IteratorFilter<T> predicate)
+    : ConstView<std::shared_ptr<T>, C>(container, predicate), underlying_container(container)
+    { }
 
     using Base::begin;
-    iterator begin() { return { underlying_container.begin() }; }
+    iterator begin() { return { underlying_container.begin(), underlying_container.end(), Base::filter }; }
     using Base::end;
-    iterator end() { return { underlying_container.end() }; }
+    iterator end() { return { underlying_container.end(), underlying_container.end(), Base::filter }; }
 };
 
 
@@ -264,15 +372,15 @@ public:
 // Helpers for the user
 
 template <class T, template <class...> class C>
-View<T, C> viewOf(C<T>& container)
+View<T, C> viewOf(C<T>& container, IteratorFilter<T> filter = DefaultFilter<T>())
 {
-    return { container };
+    return { container, filter };
 }
 
 template <class T, template <class...> class C>
-ConstView<T, C> constViewOf(C<T> const& container)
+ConstView<T, C> constViewOf(C<T> const& container, IteratorFilter<T> filter = DefaultFilter<T>())
 {
-    return { container };
+    return { container, filter };
 }
 
 template <class C>
