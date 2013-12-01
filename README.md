@@ -143,3 +143,9 @@ int main(int, char**)
 ```
 
 As you can see, views of `Document` or `AdvancedDocument` are used the same way (i.e. no extra pointer dereferencing).
+
+
+Build and run the test
+----------------------
+
+Simply execute `scons run` in the base folder to launch `test/main.cpp`.
