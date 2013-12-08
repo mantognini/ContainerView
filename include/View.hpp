@@ -259,6 +259,11 @@ public:
     {
         return std::min_element(begin(), end(), comp);
     }
+
+    const_iterator max(Compare_t<T> comp = DefaulfCompare<T>())
+    {
+        return std::max_element(begin(), end(), comp);
+    }
 };
 
 

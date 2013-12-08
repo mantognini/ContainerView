@@ -125,6 +125,14 @@ int main(int, char**)
 
     printDocument(view::create(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
 
+    auto advancedDocView = view::create(ys);
+    std::cout << "Max Element of AdvancedDocument: ";
+    advancedDocView.max()->print(0);
+
+    auto advancedDocView2 = view::create(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; });
+    std::cout << "Max Element of AdvancedDocument with filter (even only): ";
+    advancedDocView2.max()->print(0);
+
     using V = ViewTypeFromVar(xs);
     using CV = ConstViewTypeFromVar(xs);
 
