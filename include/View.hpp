@@ -80,7 +80,7 @@ using ConstRef_t =
 // View Filter Type and Default Filter
 
 template <class T>
-using IteratorFilter = std::function<bool(ConstRef_t<ElementType_t<T>>)>;
+using Filter_t = std::function<bool(ConstRef_t<ElementType_t<T>>)>;
 
 template <class T>
 struct DefaultFilter
@@ -135,9 +135,9 @@ namespace priv
     protected:
         I self; // The underlying iterator
         I end;
-        IteratorFilter<T> filter;
+        Filter_t<T> filter;
 
-        IteratorBase(I it, I end, IteratorFilter<T> predicate)
+        IteratorBase(I it, I end, Filter_t<T> predicate)
         : self(it), end(end), filter(predicate)
         {
             if (end != self && !filter(get()))
@@ -206,12 +206,12 @@ class ConstView
 {
 protected:
     ConstRef_t<C<T>> underlying_container;
-    IteratorFilter<T> filter;
+    Filter_t<T> filter;
 
 public:
     using const_iterator = ConstViewIterator<T, C>;
 
-    ConstView(ConstRef_t<C<T>> container, IteratorFilter<T> predicate)
+    ConstView(ConstRef_t<C<T>> container, Filter_t<T> predicate)
     : underlying_container(container), filter(predicate)
     { }
 
@@ -230,7 +230,7 @@ class View : public ConstView<T, C>
 public:
     using iterator = ViewIterator<T, C>;
 
-    View(Ref_t<C<T>> container, IteratorFilter<T> predicate)
+    View(Ref_t<C<T>> container, Filter_t<T> predicate)
     : Base(container, predicate), underlying_container(container)
     { }
 
@@ -247,7 +247,7 @@ public:
 // Helpers for the user
 
 template <class T, template <class...> class C>
-View<T, C> create(C<T>& container, IteratorFilter<T> filter = DefaultFilter<T>())
+View<T, C> create(C<T>& container, Filter_t<T> filter = DefaultFilter<T>())
 {
     return { container, filter };
 }
@@ -255,7 +255,7 @@ View<T, C> create(C<T>& container, IteratorFilter<T> filter = DefaultFilter<T>()
 
 
 template <class T, template <class...> class C>
-ConstView<T, C> create(C<T> const& container, IteratorFilter<T> filter = DefaultFilter<T>())
+ConstView<T, C> create(C<T> const& container, Filter_t<T> filter = DefaultFilter<T>())
 {
     return { container, filter };
 }
