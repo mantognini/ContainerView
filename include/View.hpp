@@ -31,6 +31,7 @@
 #include <type_traits>
 #include <memory>
 #include <functional>
+#include <algorithm>
 #include <cassert>
 
 namespace view
@@ -87,6 +88,16 @@ struct DefaultFilter
 {
     inline bool operator()(ConstRef_t<ElementType_t<T>>) { return true; }
 };
+
+
+
+// View Comparator
+
+template <class T>
+using Compare_t = std::function<bool(ConstRef_t<ElementType_t<T>>, ConstRef_t<ElementType_t<T>>)>;
+
+template <class T>
+using DefaulfCompare = std::less<ConstRef_t<ElementType_t<T>>>;
 
 
 
@@ -217,6 +228,13 @@ public:
 
     const_iterator begin() const { return { underlying_container.begin(), underlying_container.end(), filter }; }
     const_iterator end()   const { return { underlying_container.end(),   underlying_container.end(), filter }; }
+
+    // Add some algorithms to ease the use of views
+
+    const_iterator min(Compare_t<T> comp = DefaulfCompare<T>())
+    {
+        return std::min_element(begin(), end(), comp);
+    }
 };
 
 
