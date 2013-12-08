@@ -33,7 +33,8 @@
 #include <functional>
 #include <cassert>
 
-
+namespace view
+{
 
 // Predeclarations
 
@@ -246,7 +247,7 @@ public:
 // Helpers for the user
 
 template <class T, template <class...> class C>
-View<T, C> viewOf(C<T>& container, IteratorFilter<T> filter = DefaultFilter<T>())
+View<T, C> create(C<T>& container, IteratorFilter<T> filter = DefaultFilter<T>())
 {
     return { container, filter };
 }
@@ -254,7 +255,7 @@ View<T, C> viewOf(C<T>& container, IteratorFilter<T> filter = DefaultFilter<T>()
 
 
 template <class T, template <class...> class C>
-ConstView<T, C> constViewOf(C<T> const& container, IteratorFilter<T> filter = DefaultFilter<T>())
+ConstView<T, C> create(C<T> const& container, IteratorFilter<T> filter = DefaultFilter<T>())
 {
     return { container, filter };
 }
@@ -262,19 +263,21 @@ ConstView<T, C> constViewOf(C<T> const& container, IteratorFilter<T> filter = De
 
 
 template <class C>
-using ViewTypeFromCT_t = decltype(viewOf(std::declval<C&>()));
+using ViewForContainer_t = decltype(create(std::declval<C&>()));
 
 
 
 template <class C>
-using ConstViewTypeFromCT_t = decltype(constViewOf(std::declval<C const&>()));
+using ConstViewForContainer_t = decltype(create(std::declval<C const&>()));
 
 
 
-#define ViewTypeFromCTVar(container) ViewTypeFromCT_t<decltype(container)>
-#define ConstViewTypeFromCTVar(container) ConstViewTypeFromCT_t<decltype(container)>
+#define ViewTypeFromVar(container) view::ViewForContainer_t<decltype(container)>
+#define ConstViewTypeFromVar(container) view::ConstViewForContainer_t<decltype(container)>
 
 
+
+} // end of namespace view
 
 #endif // CONTAINERVIEW_VIEW_HPP
 

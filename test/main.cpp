@@ -47,8 +47,8 @@ public:
 };
 
 using Document = std::vector<Element>;
-using DocumentView = ViewTypeFromCT_t<Document>;
-using DocumentConstView = ConstViewTypeFromCT_t<Document>;
+using DocumentView = view::ViewForContainer_t<Document>;
+using DocumentConstView = view::ConstViewForContainer_t<Document>;
 
 // Loading need the vector itself since it needs to add elements
 void loadDocument(Document& doc)
@@ -73,8 +73,8 @@ void printDocument(DocumentConstView view)
 
 
 using AdvancedDocument = std::vector<std::shared_ptr<Element>>;
-using AdvancedDocumentView = ViewTypeFromCT_t<AdvancedDocument>;
-using AdvancedDocumentConstView = ConstViewTypeFromCT_t<AdvancedDocument>;
+using AdvancedDocumentView = view::ViewForContainer_t<AdvancedDocument>;
+using AdvancedDocumentConstView = view::ConstViewForContainer_t<AdvancedDocument>;
 
 // Loading need the vector itself since it needs to add elements
 void loadDocument(AdvancedDocument& doc)
@@ -101,22 +101,22 @@ int main(int, char**)
 {
     Document xs;
     loadDocument(xs);
-    printDocument(viewOf(xs));  // Ok, auto conversion to const view
-    updateDocument(viewOf(xs));
-    printDocument(constViewOf(xs));
+    printDocument(view::create(xs));  // Ok, auto conversion to const view
+    updateDocument(view::create(xs));
+    printDocument(view::create(static_cast<Document const&>(xs)));
 
-    printDocument(constViewOf(xs, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
+    printDocument(view::create(xs, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
 
     AdvancedDocument ys;
     loadDocument(ys);
-    printDocument(viewOf(ys));  // Ok, auto conversion to const view
-    updateDocument(viewOf(ys));
-    printDocument(constViewOf(ys));
+    printDocument(view::create(ys));  // Ok, auto conversion to const view
+    updateDocument(view::create(ys));
+    printDocument(view::create(static_cast<AdvancedDocument const&>(ys)));
 
-    printDocument(constViewOf(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
+    printDocument(view::create(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
 
-    using V = ViewTypeFromCTVar(xs);
-    using CV = ConstViewTypeFromCTVar(xs);
+    using V = ViewTypeFromVar(xs);
+    using CV = ConstViewTypeFromVar(xs);
 
     std::cout << "Name V: " << typeid(V).name() << std::endl;
     std::cout << "Name CV: " << typeid(CV).name() << std::endl;
