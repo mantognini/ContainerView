@@ -88,6 +88,32 @@ struct DefaultFilter
 namespace priv
 {
     /*
+     * Get the reference to the value of the iterator.
+     * I is the iterator type
+     * R is the reference type
+     * IsPtr is a boolean indicating if an extra dereference is required
+     */
+    template <class I, class R, bool IsPtr>
+    struct IteratorGet
+    {
+        static R get(I it) { return *it; }
+    };
+
+    template <class I, class R>
+    struct IteratorGet<I, R, true>
+    {
+        static R get(I it) { return **it; }
+    };
+
+
+
+    template <class T>
+    struct IsPtr : public std::false_type { };
+
+    template <class T>
+    struct IsPtr<std::shared_ptr<T>> : public std::true_type { };
+
+    /*
      * Base structure for view iterator.
      * T is the element type of the container
      * C is the container template type
@@ -122,7 +148,7 @@ namespace priv
 
     public:
         IteratorBase& operator++() { increment(); return *this; }
-        R get() const { assert(self != end); return *self; }
+        R get() const { assert(self != end); return IteratorGet<I, R, IsPtr<T>::value>::get(self); }
         R operator*() const { return get(); }
 
         // Free function !=
@@ -139,11 +165,11 @@ namespace priv
 // Iterators for View
 
 template <class T, template <class...> class C>
-class ViewIterator : public priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<T>>
+class ViewIterator : public priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>>
 {
 public:
     // Import constructor & set up friendship with the view itself
-    using priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<T>>::IteratorBase;
+    using priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>>::IteratorBase;
     friend View<T, C>;
     friend ConstView<T, C>;
 };
@@ -153,11 +179,11 @@ public:
 // Basically the same as ViewIterator but returns const values
 
 template <class T, template <class...> class C>
-class ConstViewIterator : public priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<T>>
+class ConstViewIterator : public priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<ElementType_t<T>>>
 {
 public:
     // Import constructor & set up friendship with the view itself
-    using priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<T>>::IteratorBase;
+    using priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<ElementType_t<T>>>::IteratorBase;
     friend View<T, C>;
     friend ConstView<T, C>;
 };
