@@ -167,13 +167,6 @@ namespace priv
         I end;
         Filter_t<T> filter;
 
-        IteratorBase(I it, I end, Filter_t<T> predicate)
-        : self(it), end(end), filter(predicate)
-        {
-            if (end != self && !filter(getRef()))
-                increment();
-        }
-
         void increment()
         {
             // Loop until a valid element is found or the end is reached
@@ -186,6 +179,15 @@ namespace priv
         }
 
     public:
+        IteratorBase(I it, I end, Filter_t<T> predicate)
+        : self(it), end(end), filter(predicate)
+        {
+            if (end != self && !filter(getRef()))
+                increment();
+        }
+
+        // Iterator ops
+
         IteratorBase& operator++() { increment(); return *this; }
         R getRef() const { assert(self != end); return IteratorGet<I, R, IsPtr<T>::value>::ref(self); }
         P getPtr() const { return &getRef(); }
