@@ -69,8 +69,26 @@ using Ref_t =
 
 
 template <class T>
+using Ptr_t =
+    typename std::add_pointer<
+        typename std::decay<T>::type
+    >::type;
+
+
+
+template <class T>
 using ConstRef_t =
     typename std::add_lvalue_reference<
+        typename std::add_const<
+            typename std::decay<T>::type
+        >::type
+    >::type;
+
+
+
+template <class T>
+using ConstPtr_t =
+    typename std::add_pointer<
         typename std::add_const<
             typename std::decay<T>::type
         >::type
@@ -114,13 +132,13 @@ namespace priv
     template <class I, class R, bool IsPtr>
     struct IteratorGet
     {
-        static R get(I it) { return *it; }
+        static R ref(I it) { return *it; }
     };
 
     template <class I, class R>
     struct IteratorGet<I, R, true>
     {
-        static R get(I it) { return **it; }
+        static R ref(I it) { return **it; }
     };
 
 
@@ -139,8 +157,9 @@ namespace priv
      * C is the container template type
      * I is the iterator type (e.g. const_iterator)
      * R is the reference type (e.g. const ref)
+     * P is the pointer type
      */
-    template <class T, template <class ...> class C, class I, class R>
+    template <class T, template <class ...> class C, class I, class R, class P>
     class IteratorBase
     {
     protected:
@@ -151,7 +170,7 @@ namespace priv
         IteratorBase(I it, I end, Filter_t<T> predicate)
         : self(it), end(end), filter(predicate)
         {
-            if (end != self && !filter(get()))
+            if (end != self && !filter(getRef()))
                 increment();
         }
 
@@ -161,15 +180,17 @@ namespace priv
             bool loop = self != end;
             while (loop) {
                 ++self;
-                if (self == end || filter(get()))
+                if (self == end || filter(getRef()))
                     loop = false;
             }
         }
 
     public:
         IteratorBase& operator++() { increment(); return *this; }
-        R get() const { assert(self != end); return IteratorGet<I, R, IsPtr<T>::value>::get(self); }
-        R operator*() const { return get(); }
+        R getRef() const { assert(self != end); return IteratorGet<I, R, IsPtr<T>::value>::ref(self); }
+        P getPtr() const { return &getRef(); }
+        R operator*() const { return getRef(); }
+        P operator->() const { return getPtr(); }
 
         // Free function !=
         friend
@@ -185,27 +206,30 @@ namespace priv
 // Iterators for View
 
 template <class T, template <class...> class C>
-class ViewIterator : public priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>>
+class ConstViewIterator : public priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<ElementType_t<T>>, ConstPtr_t<ElementType_t<T>>>
 {
 public:
     // Import constructor & set up friendship with the view itself
-    using priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>>::IteratorBase;
+    using priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<ElementType_t<T>>, ConstPtr_t<ElementType_t<T>>>::IteratorBase;
     friend View<T, C>;
     friend ConstView<T, C>;
 };
 
 
 
-// Basically the same as ViewIterator but returns const values
+// And the non const version
 
 template <class T, template <class...> class C>
-class ConstViewIterator : public priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<ElementType_t<T>>>
+class ViewIterator : public priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>, Ptr_t<ElementType_t<T>>>
 {
 public:
     // Import constructor & set up friendship with the view itself
-    using priv::IteratorBase<T, C, typename C<T>::const_iterator, ConstRef_t<ElementType_t<T>>>::IteratorBase;
+    using priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>, Ptr_t<ElementType_t<T>>>::IteratorBase;
     friend View<T, C>;
     friend ConstView<T, C>;
+
+    using Base = priv::IteratorBase<T, C, typename C<T>::iterator, Ref_t<ElementType_t<T>>, Ptr_t<ElementType_t<T>>>;
+    operator ConstViewIterator<T, C>() { return { Base::self, Base::end, Base::filter}; }
 };
 
 
