@@ -129,9 +129,12 @@ int main(int, char**)
     std::cout << "Max Element of AdvancedDocument: ";
     advancedDocView.max()->print(0);
 
-    auto advancedDocView2 = view::create(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; });
+    auto advancedDocView2 = view::create(ys, [](Element const& e) { return e.getX() % 2 == 0; });
     std::cout << "Max Element of AdvancedDocument with filter (even only): ";
     advancedDocView2.max()->print(0);
+
+    std::cout << "Max Element of AdvancedDocument with custom Comparator: ";
+    advancedDocView.max([](Element const& a, Element const& b) { return b < a; })->print(0);
 
     using V = ViewTypeFromVar(xs);
     using CV = ConstViewTypeFromVar(xs);
