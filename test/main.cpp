@@ -71,7 +71,7 @@ void printDocument(DocumentConstView view)
     std::cout << "</Document>" << std::endl;
 }
 
-
+/*
 using AdvancedDocument = std::vector<std::shared_ptr<Element>>;
 using AdvancedDocumentView = ViewTypeFromCT_t<AdvancedDocument>;
 using AdvancedDocumentConstView = ConstViewTypeFromCT_t<AdvancedDocument>;
@@ -96,7 +96,7 @@ void printDocument(AdvancedDocumentConstView view)
         e.print(1);
     std::cout << "</AdvancedDocument>" << std::endl;
 }
-
+*/
 int main(int, char**)
 {
     Document xs;
@@ -107,13 +107,13 @@ int main(int, char**)
 
     printDocument(constViewOf(xs, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
 
-    AdvancedDocument ys;
-    loadDocument(ys);
-    printDocument(viewOf(ys));  // Ok, auto conversion to const view
-    updateDocument(viewOf(ys));
-    printDocument(constViewOf(ys));
+    // AdvancedDocument ys;
+    // loadDocument(ys);
+    // printDocument(viewOf(ys));  // Ok, auto conversion to const view
+    // updateDocument(viewOf(ys));
+    // printDocument(constViewOf(ys));
 
-    printDocument(constViewOf(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
+    // printDocument(constViewOf(ys, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
 
     using V = ViewTypeFromCTVar(xs);
     using CV = ConstViewTypeFromCTVar(xs);
@@ -121,7 +121,7 @@ int main(int, char**)
     std::cout << "Name V: " << typeid(V).name() << std::endl;
     std::cout << "Name CV: " << typeid(CV).name() << std::endl;
     std::cout << "Name DocumentView: " << typeid(DocumentView).name() << std::endl;
-    std::cout << "Name AdvancedDocumentView: " << typeid(AdvancedDocumentView).name() << std::endl;
+    // std::cout << "Name AdvancedDocumentView: " << typeid(AdvancedDocumentView).name() << std::endl;
 
     return 0;
 }
