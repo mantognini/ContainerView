@@ -46,6 +46,8 @@ public:
     int getX() const { return x; }
 };
 
+bool operator<(Element const& a, Element const& b) { return a.getX() < b.getX(); }
+
 using Document = std::vector<Element>;
 using DocumentView = view::ViewForContainer_t<Document>;
 using DocumentConstView = view::ConstViewForContainer_t<Document>;
@@ -106,6 +108,14 @@ int main(int, char**)
     printDocument(view::create(static_cast<Document const&>(xs)));
 
     printDocument(view::create(xs, [](Element const& e) { /*std::cout << "Testing..." << e.getX(); */ return e.getX() % 2 == 0; }));
+
+    auto docView = view::create(xs);
+    std::cout << "Min Element of the Document: ";
+    docView.min()->print(0);
+
+    auto docView2 = view::create(xs, [](Element const& e) { return e.getX() > 3; });
+    std::cout << "Min Element of the Document with filter > 3: ";
+    docView2.min()->print(0);
 
     AdvancedDocument ys;
     loadDocument(ys);
